@@ -952,6 +952,10 @@ pub fn StateMachineType(
             if (t.id == 0) return .id_must_not_be_zero;
             if (t.id == math.maxInt(u128)) return .id_must_not_be_int_max;
 
+            if (!t.flags.pending and t.flags.lock_credit) {
+                return .cannot_lock_credit_for_non_pending_transfer;
+            }
+
             if (t.flags.post_pending_transfer or t.flags.void_pending_transfer) {
                 return self.post_or_void_pending_transfer(t);
             }
@@ -1211,10 +1215,6 @@ pub fn StateMachineType(
                 assert(amount <= p.amount);
                 dr_mut_new.debits_posted += amount;
                 cr_mut_new.credits_posted += amount;
-            }
-
-            if (t.flags.lock_credit) {
-                cr_mut_new.mutable_flags.locked_credit = true;
             }
 
             if (p.flags.lock_credit) {

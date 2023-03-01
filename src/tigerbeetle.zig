@@ -222,6 +222,7 @@ pub const CreateTransferResult = enum(u32) {
     exceeds_debits = 54,
 
     credit_account_locked = 55,
+    cannot_lock_credit_for_non_pending_transfer = 56,
 
     comptime {
         for (std.enums.values(CreateTransferResult)) |result, index| {
