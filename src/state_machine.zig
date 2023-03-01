@@ -13,6 +13,7 @@ const WorkloadType = @import("state_machine/workload.zig").WorkloadType;
 
 const Account = tb.Account;
 const AccountFlags = tb.AccountFlags;
+const AccountMutableFlags = tb.AccountMutableFlags;
 
 const Transfer = tb.Transfer;
 const TransferFlags = tb.TransferFlags;
@@ -131,7 +132,8 @@ pub fn StateMachineType(
             credits_pending: u64,
             credits_posted: u64,
             timestamp: u64,
-            padding: [24]u8,
+            mutable_flags: AccountMutableFlags,
+            padding: [22]u8,
 
             comptime {
                 assert(@sizeOf(AccountMutable) == 64);
@@ -145,7 +147,8 @@ pub fn StateMachineType(
                     .credits_pending = a.credits_pending,
                     .credits_posted = a.credits_posted,
                     .timestamp = a.timestamp,
-                    .padding = mem.zeroes([24]u8),
+                    .mutable_flags = a.mutable_flags,
+                    .padding = mem.zeroes([22]u8),
                 };
             }
         };
@@ -155,7 +158,8 @@ pub fn StateMachineType(
             return Account{
                 .id = immut.id,
                 .user_data = immut.user_data,
-                .reserved = mem.zeroes([48]u8),
+                .mutable_flags = mut.mutable_flags,
+                .reserved = mem.zeroes([46]u8),
                 .ledger = immut.ledger,
                 .code = immut.code,
                 .flags = immut.flags,
@@ -222,7 +226,7 @@ pub fn StateMachineType(
                         2 * constants.batch_max.create_transfers,
                     ),
                 },
-                .ignored = &[_][]const u8{"padding"},
+                .ignored = &[_][]const u8{ "mutable_flags", "padding" },
                 .derived = .{},
             },
         );
@@ -883,7 +887,14 @@ pub fn StateMachineType(
             assert(a.timestamp > self.commit_timestamp or global_constants.aof_recovery);
 
             if (a.flags.padding != 0) return .reserved_flag;
-            if (!zeroed_48_bytes(a.reserved)) return .reserved_field;
+
+            if (a.mutable_flags.padding != 0) return .reserved_mutable_flag;
+
+            var reserved_is_zeroed = true;
+            for (a.reserved) |byte| {
+                reserved_is_zeroed = reserved_is_zeroed and (byte == 0);
+            }
+            if (!reserved_is_zeroed) return .reserved_field;
 
             if (a.id == 0) return .id_must_not_be_zero;
             if (a.id == math.maxInt(u128)) return .id_must_not_be_int_max;
@@ -922,7 +933,11 @@ pub fn StateMachineType(
             assert(a.id == e.id);
             if (@bitCast(u16, a.flags) != @bitCast(u16, e.flags)) return .exists_with_different_flags;
             if (a.user_data != e.user_data) return .exists_with_different_user_data;
-            assert(zeroed_48_bytes(a.reserved) and zeroed_16_bytes(e.padding));
+            var reserved_is_zeroed = true;
+            for (a.reserved) |byte| {
+                reserved_is_zeroed = reserved_is_zeroed and (byte == 0);
+            }
+            assert(reserved_is_zeroed and zeroed_16_bytes(e.padding));
             if (a.ledger != e.ledger) return .exists_with_different_ledger;
             if (a.code != e.code) return .exists_with_different_code;
             return .exists;
@@ -1003,6 +1018,10 @@ pub fn StateMachineType(
                 break :amount amount;
             };
 
+            if (cr_mut.mutable_flags.locked_credit) {
+                return .credit_account_locked;
+            }
+
             if (t.flags.pending) {
                 if (sum_overflows(amount, dr_mut.debits_pending)) return .overflows_debits_pending;
                 if (sum_overflows(amount, cr_mut.credits_pending)) return .overflows_credits_pending;
@@ -1028,6 +1047,9 @@ pub fn StateMachineType(
             var dr_mut_new = dr_mut.*;
             var cr_mut_new = cr_mut.*;
             if (t.flags.pending) {
+                if (t.flags.lock_credit) {
+                    cr_mut_new.mutable_flags.locked_credit = true;
+                }
                 dr_mut_new.debits_pending += amount;
                 cr_mut_new.credits_pending += amount;
             } else {
@@ -1189,6 +1211,14 @@ pub fn StateMachineType(
                 assert(amount <= p.amount);
                 dr_mut_new.debits_posted += amount;
                 cr_mut_new.credits_posted += amount;
+            }
+
+            if (t.flags.lock_credit) {
+                cr_mut_new.mutable_flags.locked_credit = true;
+            }
+
+            if (p.flags.lock_credit) {
+                cr_mut_new.mutable_flags.locked_credit = false;
             }
 
             self.forest.grooves.accounts_mutable.put(&dr_mut_new);

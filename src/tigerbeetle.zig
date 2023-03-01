@@ -6,8 +6,9 @@ pub const Account = extern struct {
     id: u128,
     /// Opaque third-party identifier to link this account (many-to-one) to an external entity.
     user_data: u128,
+    mutable_flags: AccountMutableFlags,
     /// Reserved for accounting policy primitives.
-    reserved: [48]u8,
+    reserved: [46]u8,
     ledger: u32,
     /// A chart of accounts code describing the type of account (e.g. clearing, settlement).
     code: u16,
@@ -32,6 +33,15 @@ pub const Account = extern struct {
     pub fn credits_exceed_debits(self: *const Account, amount: u64) bool {
         return (self.flags.credits_must_not_exceed_debits and
             self.credits_pending + self.credits_posted + amount > self.debits_posted);
+    }
+};
+
+pub const AccountMutableFlags = packed struct {
+    locked_credit: bool = false,
+    padding: u15 = 0,
+
+    comptime {
+        assert(@sizeOf(AccountMutableFlags) == @sizeOf(u16));
     }
 };
 
@@ -88,7 +98,8 @@ pub const TransferFlags = packed struct {
     void_pending_transfer: bool = false,
     balancing_debit: bool = false,
     balancing_credit: bool = false,
-    padding: u10 = 0,
+    lock_credit: bool = false,
+    padding: u9 = 0,
 
     comptime {
         assert(@sizeOf(TransferFlags) == @sizeOf(u16));
@@ -124,6 +135,8 @@ pub const CreateAccountResult = enum(u32) {
     exists_with_different_ledger = 17,
     exists_with_different_code = 18,
     exists = 19,
+
+    reserved_mutable_flag = 20,
 
     comptime {
         for (std.enums.values(CreateAccountResult)) |result, index| {
@@ -207,6 +220,8 @@ pub const CreateTransferResult = enum(u32) {
 
     exceeds_credits = 53,
     exceeds_debits = 54,
+
+    credit_account_locked = 55,
 
     comptime {
         for (std.enums.values(CreateTransferResult)) |result, index| {

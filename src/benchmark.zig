@@ -239,7 +239,8 @@ const Benchmark = struct {
             b.batch_accounts.appendAssumeCapacity(.{
                 .id = @bitReverse(u128, b.account_index + 1),
                 .user_data = 0,
-                .reserved = [_]u8{0} ** 48,
+                .mutable_flags = .{},
+                .reserved = [_]u8{0} ** 46,
                 .ledger = 2,
                 .code = 1,
                 .flags = .{},
