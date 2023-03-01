@@ -15,11 +15,12 @@ const client = createClient({
 
 // Test data
 const Zeroed32Bytes = Buffer.alloc(32, 0)
-const Zeroed48Bytes = Buffer.alloc(48, 0)
+const Zeroed46Bytes = Buffer.alloc(46, 0)
 const accountA: Account = {
   id: 17n,
   user_data: 0n,
-  reserved: Zeroed48Bytes,
+  mutable_flags: 0,
+  reserved: Zeroed46Bytes,
   ledger: 1,
   code: 718,
   flags: 0,
@@ -32,7 +33,8 @@ const accountA: Account = {
 const accountB: Account = {
   id: 19n,
   user_data: 0n,
-  reserved: Zeroed48Bytes,
+  mutable_flags: 0,
+  reserved: Zeroed46Bytes,
   ledger: 1,
   code: 719,
   flags: 0,

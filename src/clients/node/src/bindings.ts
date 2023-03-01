@@ -26,6 +26,11 @@ export enum AccountFlags {
   credits_must_not_exceed_debits = (1 << 2),
 }
 
+export enum AccountMutableFlags {
+  none = 0,
+
+  locked_credit = (1 << 0),
+}
 
 /**
 * See [TransferFlags](https://docs.tigerbeetle.com/reference/transfers#flags)
@@ -62,6 +67,8 @@ export enum TransferFlags {
   * See [balancing_credit](https://docs.tigerbeetle.com/reference/transfers#flagsbalancing_credit)
   */
   balancing_credit = (1 << 5),
+
+  lock_credit = (1 << 6),
 }
 
 
@@ -79,6 +86,8 @@ export type Account = {
   * See [user_data](https://docs.tigerbeetle.com/reference/accounts/#user_data)
   */
   user_data: bigint
+
+  mutable_flags: number
 
   /**
   * See [reserved](https://docs.tigerbeetle.com/reference/accounts/#reserved)
@@ -298,6 +307,8 @@ export enum CreateAccountError {
   * See [exists](https://docs.tigerbeetle.com/reference/operations/create_accounts#exists)
   */
   exists = 19,
+
+  reserved_mutable_flag = 20,
 }
 
 
@@ -580,6 +591,12 @@ export enum CreateTransferError {
   * See [exceeds_debits](https://docs.tigerbeetle.com/reference/operations/create_transfers#exceeds_debits)
   */
   exceeds_debits = 54,
+
+  cannot_post_and_void_pending_transfer = 55,
+
+  pending_transfer_cannot_post_or_void_another = 56,
+
+  credit_account_locked = 57,
 }
 
 export type CreateAccountsError = {

@@ -23,11 +23,12 @@ const client = createClient({
 })
 
 const TRANSFER_SIZE = 128
-const Zeroed48Bytes = Buffer.alloc(48, 0)
+const Zeroed46Bytes = Buffer.alloc(46, 0)
 const accountA: Account = {
   id: 137n,
   user_data: 0n,
-  reserved: Zeroed48Bytes,
+  mutable_flags: 0,
+  reserved: Zeroed46Bytes,
   ledger: 1,
   code: 1,
   flags: 0,
@@ -41,7 +42,8 @@ const accountA: Account = {
 const accountB: Account = {
   id: 138n,
   user_data: 0n,
-  reserved: Zeroed48Bytes,
+  mutable_flags: 0,
+  reserved: Zeroed46Bytes,
   ledger: 1,
   code: 1,
   flags: 0,
