@@ -87,7 +87,8 @@ test('can lookup accounts', async (): Promise<void> => {
   assert.strictEqual(accounts.length, 2)
   const account1 = accounts[0]
   assert.strictEqual(account1.id, 17n)
-  assert.ok(account1.reserved.equals(Zeroed48Bytes))
+  assert.strictEqual(account1.mutable_flags, 0)
+  assert.ok(account1.reserved.equals(Zeroed46Bytes))
   assert.strictEqual(account1.user_data, 0n)
   assert.strictEqual(account1.code, 718)
   assert.strictEqual(account1.ledger, 1)
@@ -100,7 +101,8 @@ test('can lookup accounts', async (): Promise<void> => {
 
   const account2 = accounts[1]
   assert.strictEqual(account2.id, 19n)
-  assert.ok(account2.reserved.equals(Zeroed48Bytes))
+  assert.strictEqual(account2.mutable_flags, 0)
+  assert.ok(account2.reserved.equals(Zeroed46Bytes))
   assert.strictEqual(account2.user_data, 0n)
   assert.strictEqual(account2.code, 719)
   assert.strictEqual(account2.ledger, 1)
