@@ -7,6 +7,7 @@ const tb = @import("../../../tigerbeetle.zig");
 
 const Account = tb.Account;
 const AccountFlags = tb.AccountFlags;
+const AccountMutableFlags = tb.AccountMutableFlags;
 const Transfer = tb.Transfer;
 const TransferFlags = tb.TransferFlags;
 const CreateAccountsResult = tb.CreateAccountsResult;
@@ -195,7 +196,8 @@ fn decode_from_object(comptime T: type, env: c.napi_env, object: c.napi_value) !
         Account => Account{
             .id = try translate.u128_from_object(env, object, "id"),
             .user_data = try translate.u128_from_object(env, object, "user_data"),
-            .reserved = try translate.bytes_from_object(env, object, 48, "reserved"),
+            .mutable_flags = @bitCast(AccountMutableFlags, try translate.u16_from_object(env, object, "mutable_flags")),
+            .reserved = try translate.bytes_from_object(env, object, 46, "reserved"),
             .ledger = try translate.u32_from_object(env, object, "ledger"),
             .code = try translate.u16_from_object(env, object, "code"),
             .flags = @bitCast(AccountFlags, try translate.u16_from_object(env, object, "flags")),
