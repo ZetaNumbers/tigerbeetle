@@ -99,7 +99,8 @@ pub const TransferFlags = packed struct {
     balancing_debit: bool = false,
     balancing_credit: bool = false,
     lock_credit: bool = false,
-    padding: u9 = 0,
+    ignore_credit_lock: bool = false,
+    padding: u8 = 0,
 
     comptime {
         assert(@sizeOf(TransferFlags) == @sizeOf(u16));

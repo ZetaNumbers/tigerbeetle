@@ -69,6 +69,8 @@ export enum TransferFlags {
   balancing_credit = (1 << 5),
 
   lock_credit = (1 << 6),
+
+  ignore_credit_lock = (1 << 7),
 }
 
 

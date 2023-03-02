@@ -1000,6 +1000,10 @@ pub fn StateMachineType(
             assert(dr_mut.timestamp == dr_immut.timestamp);
             assert(cr_mut.timestamp == cr_immut.timestamp);
 
+            if (cr_mut.mutable_flags.locked_credit and !t.flags.ignore_credit_lock) {
+                return .credit_account_locked;
+            }
+
             const amount = amount: {
                 var amount = t.amount;
                 if (t.flags.balancing_debit or t.flags.balancing_credit) {
