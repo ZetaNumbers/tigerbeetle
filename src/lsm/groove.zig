@@ -1070,7 +1070,7 @@ test "Groove" {
                 .code = 1,
                 .amount = 1,
             },
-            .ignored = [_][]const u8{ "reserved", "user_data", "flags", "mutable_flags" },
+            .ignored = [_][]const u8{ "reserved", "user_data", "flags" },
             .derived = .{},
         },
     );

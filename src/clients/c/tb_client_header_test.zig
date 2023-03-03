@@ -40,6 +40,7 @@ test "valid tb_client.h" {
         .{ tb.Account, "tb_account_t" },
         .{ tb.Transfer, "tb_transfer_t" },
         .{ tb.AccountFlags, "TB_ACCOUNT_FLAGS" },
+        .{ tb.AccountMutableFlags, "TB_ACCOUNT_MUTABLE_FLAGS" },
         .{ tb.TransferFlags, "TB_TRANSFER_FLAGS" },
         .{ tb.CreateAccountResult, "TB_CREATE_ACCOUNT_RESULT" },
         .{ tb.CreateTransferResult, "TB_CREATE_TRANSFER_RESULT" },

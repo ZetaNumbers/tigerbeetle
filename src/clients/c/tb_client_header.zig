@@ -4,6 +4,7 @@ const tb_client = @import("tb_client.zig");
 
 const type_mappings = .{
     .{ tb.AccountFlags, "TB_ACCOUNT_FLAGS" },
+    .{ tb.AccountMutableFlags, "TB_ACCOUNT_MUTABLE_FLAGS" },
     .{ tb.Account, "tb_account_t" },
     .{ tb.TransferFlags, "TB_TRANSFER_FLAGS" },
     .{ tb.Transfer, "tb_transfer_t" },

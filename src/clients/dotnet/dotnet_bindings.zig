@@ -35,6 +35,12 @@ const type_mappings = .{
         .private_fields = &.{"padding"},
         .docs_link = "reference/accounts#flags",
     } },
+    .{ tb.AccountMutableFlags, TypeMapping{
+        .name = "AccountMutableFlags",
+        .visibility = .public,
+        .private_fields = &.{"padding"},
+        .docs_link = "reference/accounts#mutable_flags",
+    } },
     .{ tb.TransferFlags, TypeMapping{
         .name = "TransferFlags",
         .visibility = .public,
