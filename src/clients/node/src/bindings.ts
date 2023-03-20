@@ -594,13 +594,9 @@ export enum CreateTransferError {
   */
   exceeds_debits = 54,
 
-  cannot_post_and_void_pending_transfer = 55,
+  credit_account_locked = 55,
 
-  pending_transfer_cannot_post_or_void_another = 56,
-
-  credit_account_locked = 57,
-
-  cannot_lock_credit_for_non_pending_transfer = 58,
+  cannot_lock_credit_for_non_pending_transfer = 56,
 }
 
 export type CreateAccountsError = {
