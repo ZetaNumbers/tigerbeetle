@@ -24,6 +24,11 @@ const type_mappings = .{
         .hidden_fields = &.{"padding"},
         .docs_link = "reference/accounts#flags",
     } },
+    .{ tb.AccountMutableFlags, TypeMapping{
+        .name = "AccountMutableFlags",
+        .hidden_fields = &.{"padding"},
+        .docs_link = "reference/accounts#mutable_flags",
+    } },
     .{ tb.TransferFlags, TypeMapping{
         .name = "TransferFlags",
         .hidden_fields = &.{"padding"},
