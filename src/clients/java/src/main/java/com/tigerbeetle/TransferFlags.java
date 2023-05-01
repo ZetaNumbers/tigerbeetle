@@ -38,6 +38,16 @@ public interface TransferFlags {
      */
     int BALANCING_CREDIT = (int) (1 << 5);
 
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/transfers#flagslock_credit">lock_credit</a>
+     */
+    int LOCK_CREDIT = (int) (1 << 6);
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/transfers#flagsignore_credit_lock">ignore_credit_lock</a>
+     */
+    int IGNORE_CREDIT_LOCK = (int) (1 << 7);
+
     static boolean hasLinked(final int flags) {
         return (flags & LINKED) == LINKED;
     }
@@ -60,6 +70,14 @@ public interface TransferFlags {
 
     static boolean hasBalancingCredit(final int flags) {
         return (flags & BALANCING_CREDIT) == BALANCING_CREDIT;
+    }
+
+    static boolean hasLockCredit(final int flags) {
+        return (flags & LOCK_CREDIT) == LOCK_CREDIT;
+    }
+
+    static boolean hasIgnoreCreditLock(final int flags) {
+        return (flags & IGNORE_CREDIT_LOCK) == IGNORE_CREDIT_LOCK;
     }
 
 }

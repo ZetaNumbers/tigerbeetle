@@ -280,7 +280,17 @@ public enum CreateTransferResult {
     /**
      * @see <a href="https://docs.tigerbeetle.com/reference/operations/create_transfers#exceeds_debits">exceeds_debits</a>
      */
-    ExceedsDebits((int) 54);
+    ExceedsDebits((int) 54),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/operations/create_transfers#credit_account_locked">credit_account_locked</a>
+     */
+    CreditAccountLocked((int) 55),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/operations/create_transfers#cannot_lock_credit_for_non_pending_transfer">cannot_lock_credit_for_non_pending_transfer</a>
+     */
+    CannotLockCreditForNonPendingTransfer((int) 56);
 
     public final int value;
 

@@ -31,6 +31,18 @@ namespace TigerBeetle
     }
 
     [Flags]
+    public enum AccountMutableFlags : ushort
+    {
+        None = 0,
+
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/accounts#mutable_flagslocked_credit
+        /// </summary>
+        LockedCredit = 1 << 0,
+
+    }
+
+    [Flags]
     public enum TransferFlags : ushort
     {
         None = 0,
@@ -65,6 +77,16 @@ namespace TigerBeetle
         /// </summary>
         BalancingCredit = 1 << 5,
 
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/transfers#flagslock_credit
+        /// </summary>
+        LockCredit = 1 << 6,
+
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/transfers#flagsignore_credit_lock
+        /// </summary>
+        IgnoreCreditLock = 1 << 7,
+
     }
 
     [StructLayout(LayoutKind.Sequential, Size = SIZE)]
@@ -75,7 +97,7 @@ namespace TigerBeetle
         [StructLayout(LayoutKind.Sequential, Size = SIZE)]
         private unsafe struct ReservedData
         {
-            public const int SIZE = 48;
+            public const int SIZE = 46;
 
             private fixed byte raw[SIZE];
 
@@ -102,6 +124,8 @@ namespace TigerBeetle
         private UInt128 id;
 
         private UInt128 userData;
+
+        private AccountMutableFlags mutableFlags;
 
         private ReservedData reserved;
 
@@ -130,6 +154,11 @@ namespace TigerBeetle
         /// https://docs.tigerbeetle.com/reference/accounts/#user_data
         /// </summary>
         public UInt128 UserData { get => userData; set => userData = value; }
+
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/accounts/#mutable_flags
+        /// </summary>
+        public AccountMutableFlags MutableFlags { get => mutableFlags; set => mutableFlags = value; }
 
         /// <summary>
         /// https://docs.tigerbeetle.com/reference/accounts/#reserved
@@ -370,6 +399,11 @@ namespace TigerBeetle
         /// https://docs.tigerbeetle.com/reference/operations/create_accounts#exists
         /// </summary>
         Exists = 19,
+
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/operations/create_accounts#reserved_mutable_flag
+        /// </summary>
+        ReservedMutableFlag = 20,
 
     }
 
@@ -649,6 +683,16 @@ namespace TigerBeetle
         /// https://docs.tigerbeetle.com/reference/operations/create_transfers#exceeds_debits
         /// </summary>
         ExceedsDebits = 54,
+
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/operations/create_transfers#credit_account_locked
+        /// </summary>
+        CreditAccountLocked = 55,
+
+        /// <summary>
+        /// https://docs.tigerbeetle.com/reference/operations/create_transfers#cannot_lock_credit_for_non_pending_transfer
+        /// </summary>
+        CannotLockCreditForNonPendingTransfer = 56,
 
     }
 

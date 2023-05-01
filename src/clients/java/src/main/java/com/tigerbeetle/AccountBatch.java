@@ -14,7 +14,8 @@ public final class AccountBatch extends Batch {
 
         int Id = 0;
         int UserData = 16;
-        int Reserved = 32;
+        int MutableFlags = 32;
+        int Reserved = 34;
         int Ledger = 80;
         int Code = 84;
         int Flags = 86;
@@ -152,10 +153,29 @@ public final class AccountBatch extends Batch {
 
     /**
      * @throws IllegalStateException if not at a {@link #isValidPosition valid position}.
+     * @see <a href="https://docs.tigerbeetle.com/reference/accounts/#mutable_flags">mutable_flags</a>
+     */
+    public int getMutableFlags() {
+        final var value = getUInt16(at(Struct.MutableFlags));
+        return value;
+    }
+
+    /**
+     * @param mutableFlags
+     * @throws IllegalStateException if not at a {@link #isValidPosition valid position}.
+     * @throws IllegalStateException if a {@link #isReadOnly() read-only} batch.
+     * @see <a href="https://docs.tigerbeetle.com/reference/accounts/#mutable_flags">mutable_flags</a>
+     */
+    public void setMutableFlags(final int mutableFlags) {
+        putUInt16(at(Struct.MutableFlags), mutableFlags);
+    }
+
+    /**
+     * @throws IllegalStateException if not at a {@link #isValidPosition valid position}.
      * @see <a href="https://docs.tigerbeetle.com/reference/accounts/#reserved">reserved</a>
      */
     byte[] getReserved() {
-        return getArray(at(Struct.Reserved), 48);
+        return getArray(at(Struct.Reserved), 46);
     }
 
     /**
@@ -166,9 +186,9 @@ public final class AccountBatch extends Batch {
      */
     void setReserved(byte[] reserved) {
         if (reserved == null)
-            reserved = new byte[48];
-        if (reserved.length != 48)
-            throw new IllegalArgumentException("Reserved must be 48 bytes long");
+            reserved = new byte[46];
+        if (reserved.length != 46)
+            throw new IllegalArgumentException("Reserved must be 46 bytes long");
         putArray(at(Struct.Reserved), reserved);
     }
 

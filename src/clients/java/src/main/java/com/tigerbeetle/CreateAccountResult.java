@@ -105,7 +105,12 @@ public enum CreateAccountResult {
     /**
      * @see <a href="https://docs.tigerbeetle.com/reference/operations/create_accounts#exists">exists</a>
      */
-    Exists((int) 19);
+    Exists((int) 19),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/operations/create_accounts#reserved_mutable_flag">reserved_mutable_flag</a>
+     */
+    ReservedMutableFlag((int) 20);
 
     public final int value;
 

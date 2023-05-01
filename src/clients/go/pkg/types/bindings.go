@@ -42,6 +42,8 @@ type TransferFlags struct {
 	VoidPendingTransfer bool
 	BalancingDebit      bool
 	BalancingCredit     bool
+	LockCredit          bool
+	IgnoreCreditLock    bool
 }
 
 func (f TransferFlags) ToUint16() uint16 {
@@ -71,13 +73,22 @@ func (f TransferFlags) ToUint16() uint16 {
 		ret |= (1 << 5)
 	}
 
+	if f.LockCredit {
+		ret |= (1 << 6)
+	}
+
+	if f.IgnoreCreditLock {
+		ret |= (1 << 7)
+	}
+
 	return ret
 }
 
 type Account struct {
 	ID             Uint128
 	UserData       Uint128
-	Reserved       [48]uint8
+	MutableFlags   uint16
+	Reserved       [46]uint8
 	Ledger         uint32
 	Code           uint16
 	Flags          uint16
@@ -119,6 +130,8 @@ func (o Transfer) TransferFlags() TransferFlags {
 	f.VoidPendingTransfer = ((o.Flags >> 3) & 0x1) == 1
 	f.BalancingDebit = ((o.Flags >> 4) & 0x1) == 1
 	f.BalancingCredit = ((o.Flags >> 5) & 0x1) == 1
+	f.LockCredit = ((o.Flags >> 6) & 0x1) == 1
+	f.IgnoreCreditLock = ((o.Flags >> 7) & 0x1) == 1
 	return f
 }
 
@@ -145,6 +158,7 @@ const (
 	AccountExistsWithDifferentLedger   CreateAccountResult = 17
 	AccountExistsWithDifferentCode     CreateAccountResult = 18
 	AccountExists                      CreateAccountResult = 19
+	AccountReservedMutableFlag         CreateAccountResult = 20
 )
 
 func (i CreateAccountResult) String() string {
@@ -189,6 +203,8 @@ func (i CreateAccountResult) String() string {
 		return "AccountExistsWithDifferentCode"
 	case AccountExists:
 		return "AccountExists"
+	case AccountReservedMutableFlag:
+		return "AccountReservedMutableFlag"
 	}
 	return "CreateAccountResult(" + strconv.FormatInt(int64(i+1), 10) + ")"
 }
@@ -251,6 +267,8 @@ const (
 	TransferOverflowsTimeout                           CreateTransferResult = 52
 	TransferExceedsCredits                             CreateTransferResult = 53
 	TransferExceedsDebits                              CreateTransferResult = 54
+	TransferCreditAccountLocked                        CreateTransferResult = 55
+	TransferCannotLockCreditForNonPendingTransfer      CreateTransferResult = 56
 )
 
 func (i CreateTransferResult) String() string {
@@ -365,6 +383,10 @@ func (i CreateTransferResult) String() string {
 		return "TransferExceedsCredits"
 	case TransferExceedsDebits:
 		return "TransferExceedsDebits"
+	case TransferCreditAccountLocked:
+		return "TransferCreditAccountLocked"
+	case TransferCannotLockCreditForNonPendingTransfer:
+		return "TransferCannotLockCreditForNonPendingTransfer"
 	}
 	return "CreateTransferResult(" + strconv.FormatInt(int64(i+1), 10) + ")"
 }
