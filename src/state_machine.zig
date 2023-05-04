@@ -1026,10 +1026,6 @@ pub fn StateMachineType(
                 break :amount amount;
             };
 
-            if (cr_mut.mutable_flags.locked_credit) {
-                return .credit_account_locked;
-            }
-
             if (t.flags.pending) {
                 if (sum_overflows(amount, dr_mut.debits_pending)) return .overflows_debits_pending;
                 if (sum_overflows(amount, cr_mut.credits_pending)) return .overflows_credits_pending;
