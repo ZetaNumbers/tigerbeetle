@@ -1845,8 +1845,9 @@ fn print_results(
 test "create_accounts" {
     try check(
         \\ account A1 U2 _ _ _ L3 C4 _   _   _ _  0  0  0  0 _ ok
-        \\ account A0  _ _ _ 1 L0 C0 _ D<C C<D 1  1  1  1  1 1 timestamp_must_be_zero
-        \\ account A0  _ _ _ 1 L0 C0 _ D<C C<D 1  1  1  1  1 _ reserved_flag
+        \\ account A0  _ _ 1 1 L0 C0 _ D<C C<D 1  1  1  1  1 1 timestamp_must_be_zero
+        \\ account A0  _ _ 1 1 L0 C0 _ D<C C<D 1  1  1  1  1 _ reserved_flag
+        \\ account A0  _ _ 1 1 L0 C0 _ D<C C<D _  1  1  1  1 _ reserved_mutable_flag
         \\ account A0  _ _ _ 1 L0 C0 _ D<C C<D _  1  1  1  1 _ reserved_field
         \\ account A0  _ _ _ _ L0 C0 _ D<C C<D _  1  1  1  1 _ id_must_not_be_zero
         \\ account -0  _ _ _ _ L0 C0 _ D<C C<D _  1  1  1  1 _ id_must_not_be_int_max
@@ -2008,35 +2009,36 @@ test "create_transfers/lookup_transfers" {
         \\ setup A5    0 -1000   10 -1100
 
         // Test errors by descending precedence.
-        \\ transfer T0 A0 A0  _ R1 T1   _ L0 C0 _ PEN _ _ _ _ _ _ P1    0 1 timestamp_must_be_zero
-        \\ transfer T0 A0 A0  _ R1 T1   _ L0 C0 _ PEN _ _ _ _ _ _ P1    0 _ reserved_flag
-        \\ transfer T0 A0 A0  _ R1 T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ reserved_field
-        \\ transfer T0 A0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ id_must_not_be_zero
-        \\ transfer -0 A0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ id_must_not_be_int_max
-        \\ transfer T1 A0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ debit_account_id_must_not_be_zero
-        \\ transfer T1 -0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ debit_account_id_must_not_be_int_max
-        \\ transfer T1 A8 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ credit_account_id_must_not_be_zero
-        \\ transfer T1 A8 -0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ credit_account_id_must_not_be_int_max
-        \\ transfer T1 A8 A8  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ accounts_must_be_different
-        \\ transfer T1 A8 A9  _  _ T1   _ L0 C0 _ PEN _ _ _ _ _ _  _    0 _ pending_id_must_be_zero
-        \\ transfer T1 A8 A9  _  _  _  -0 L0 C0 _   _ _ _ _ _ _ _  _    0 _ timeout_reserved_for_pending_transfer
-        \\ transfer T1 A8 A9  _  _  _  -0 L0 C0 _ PEN _ _ _ _ _ _  _    0 _ ledger_must_not_be_zero
-        \\ transfer T1 A8 A9  _  _  _  -0 L9 C0 _ PEN _ _ _ _ _ _  _    0 _ code_must_not_be_zero
-        \\ transfer T1 A8 A9  _  _  _  -0 L9 C1 _ PEN _ _ _ _ _ _  _    0 _ amount_must_not_be_zero
-        \\ transfer T1 A8 A9  _  _  _  -0 L9 C1 _ PEN _ _ _ _ _ _  _    9 _ debit_account_not_found
-        \\ transfer T1 A1 A9  _  _  _  -0 L9 C1 _ PEN _ _ _ _ _ _  _    9 _ credit_account_not_found
-        \\ transfer T1 A1 A2  _  _  _  -0 L9 C1 _ PEN _ _ _ _ _ _  _    1 _ accounts_must_have_the_same_ledger
-        \\ transfer T1 A1 A3  _  _  _  -0 L9 C1 _ PEN _ _ _ _ _ _  _    1 _ transfer_must_have_the_same_ledger_as_accounts
-        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _  -99 _ overflows_debits_pending  // amount = max - A1.debits_pending + 1
-        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _ -109 _ overflows_credits_pending // amount = max - A3.credits_pending + 1
-        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _ -199 _ overflows_debits_posted   // amount = max - A1.debits_posted + 1
-        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _ -209 _ overflows_credits_posted  // amount = max - A3.credits_posted + 1
-        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _ -299 _ overflows_debits          // amount = max - A1.debits_pending - A1.debits_posted + 1
-        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _ -319 _ overflows_credits         // amount = max - A3.credits_pending - A3.credits_posted + 1
-        \\ transfer T1 A4 A5  _  _  _  -0 L1 C1 _ PEN _ _ _ _ _ _  _  199 _ overflows_timeout         // amount = A4.credits_posted - A4.debits_pending - A4.debits_posted + 1
-        \\ transfer T1 A4 A5  _  _  _   _ L1 C1 _   _ _ _ _ _ _ _  _  199 _ exceeds_credits           // amount = A4.credits_posted - A4.debits_pending - A4.debits_posted + 1
-        \\ transfer T1 A4 A5  _  _  _   _ L1 C1 _   _ _ _ _ _ _ _  _   91 _ exceeds_debits            // amount = A5.debits_posted - A5.credits_pending - A5.credits_posted + 1
-        \\ transfer T1 A1 A3  _  _  _ 999 L1 C1 _ PEN _ _ _ _ _ _  _  123 _ ok
+        \\ transfer T0 A0 A0  _ R1 T1   _ L0 C0 _ PEN _ _ _ _ LCR _ P1    0 1 timestamp_must_be_zero
+        \\ transfer T0 A0 A0  _ R1 T1   _ L0 C0 _ PEN _ _ _ _ LCR _ P1    0 _ reserved_flag
+        \\ transfer T0 A0 A0  _ R1 T1   _ L0 C0 _ PEN _ _ _ _ LCR _  _    0 _ reserved_field
+        \\ transfer T0 A0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ LCR _  _    0 _ id_must_not_be_zero
+        \\ transfer -0 A0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _ LCR _  _    0 _ id_must_not_be_int_max
+        \\ transfer T1 A0 A0  _  _ T1   _ L0 C0 _   _ _ _ _ _ LCR _  _    0 _ cannot_lock_credit_for_non_pending_transfer
+        \\ transfer T1 A0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _   _ _  _    0 _ debit_account_id_must_not_be_zero
+        \\ transfer T1 -0 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _   _ _  _    0 _ debit_account_id_must_not_be_int_max
+        \\ transfer T1 A8 A0  _  _ T1   _ L0 C0 _ PEN _ _ _ _   _ _  _    0 _ credit_account_id_must_not_be_zero
+        \\ transfer T1 A8 -0  _  _ T1   _ L0 C0 _ PEN _ _ _ _   _ _  _    0 _ credit_account_id_must_not_be_int_max
+        \\ transfer T1 A8 A8  _  _ T1   _ L0 C0 _ PEN _ _ _ _   _ _  _    0 _ accounts_must_be_different
+        \\ transfer T1 A8 A9  _  _ T1   _ L0 C0 _ PEN _ _ _ _   _ _  _    0 _ pending_id_must_be_zero
+        \\ transfer T1 A8 A9  _  _  _  -0 L0 C0 _   _ _ _ _ _   _ _  _    0 _ timeout_reserved_for_pending_transfer
+        \\ transfer T1 A8 A9  _  _  _  -0 L0 C0 _ PEN _ _ _ _   _ _  _    0 _ ledger_must_not_be_zero
+        \\ transfer T1 A8 A9  _  _  _  -0 L9 C0 _ PEN _ _ _ _   _ _  _    0 _ code_must_not_be_zero
+        \\ transfer T1 A8 A9  _  _  _  -0 L9 C1 _ PEN _ _ _ _   _ _  _    0 _ amount_must_not_be_zero
+        \\ transfer T1 A8 A9  _  _  _  -0 L9 C1 _ PEN _ _ _ _   _ _  _    9 _ debit_account_not_found
+        \\ transfer T1 A1 A9  _  _  _  -0 L9 C1 _ PEN _ _ _ _   _ _  _    9 _ credit_account_not_found
+        \\ transfer T1 A1 A2  _  _  _  -0 L9 C1 _ PEN _ _ _ _   _ _  _    1 _ accounts_must_have_the_same_ledger
+        \\ transfer T1 A1 A3  _  _  _  -0 L9 C1 _ PEN _ _ _ _   _ _  _    1 _ transfer_must_have_the_same_ledger_as_accounts
+        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _  -99 _ overflows_debits_pending  // amount = max - A1.debits_pending + 1
+        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _ -109 _ overflows_credits_pending // amount = max - A3.credits_pending + 1
+        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _ -199 _ overflows_debits_posted   // amount = max - A1.debits_posted + 1
+        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _ -209 _ overflows_credits_posted  // amount = max - A3.credits_posted + 1
+        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _ -299 _ overflows_debits          // amount = max - A1.debits_pending - A1.debits_posted + 1
+        \\ transfer T1 A1 A3  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _ -319 _ overflows_credits         // amount = max - A3.credits_pending - A3.credits_posted + 1
+        \\ transfer T1 A4 A5  _  _  _  -0 L1 C1 _ PEN _ _ _ _   _ _  _  199 _ overflows_timeout         // amount = A4.credits_posted - A4.debits_pending - A4.debits_posted + 1
+        \\ transfer T1 A4 A5  _  _  _   _ L1 C1 _   _ _ _ _ _   _ _  _  199 _ exceeds_credits           // amount = A4.credits_posted - A4.debits_pending - A4.debits_posted + 1
+        \\ transfer T1 A4 A5  _  _  _   _ L1 C1 _   _ _ _ _ _   _ _  _   91 _ exceeds_debits            // amount = A5.debits_posted - A5.credits_pending - A5.credits_posted + 1
+        \\ transfer T1 A1 A3  _  _  _ 999 L1 C1 _ PEN _ _ _ _   _ _  _  123 _ ok
 
         // Ensure that idempotence is only checked after validation.
         \\ transfer T1 A1 A3  _  _  _ 999 L2 C1 _ PEN _ _ _ _ _ _  _  123 _ transfer_must_have_the_same_ledger_as_accounts
@@ -2374,6 +2376,20 @@ test "create_transfers: balancing_debit/balancing_credit + pending" {
         \\ lookup_transfer T3 amount  3
         \\ lookup_transfer T4 amount  5
         \\ commit lookup_transfers
+    );
+}
+
+test "credit_account_locked" {
+    try check(
+        \\ account A1 _   _ _ _ L1 C1 _ D<C   _ _ 0 0 0 0 _ ok
+        \\ account A2 _ LCR _ _ L1 C1 _   _ C<D _ 0 0 0 0 _ ok
+        \\ commit create_accounts
+        \\
+        \\ setup A1 0  0 0 10
+        \\ setup A2 0 10 0  0
+        \\
+        \\ transfer T1 A1 A2  _ _   _ _ L1 C1 _ PEN   _   _ BDR   _ _ _ _  3 _ credit_account_locked
+        \\ commit create_transfers
     );
 }
 
